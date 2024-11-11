@@ -53,6 +53,11 @@ st.markdown(
         margin-bottom: 0px;  /* Ajuste o valor para diminuir o espaço */
         margin-top: 10px;
     }
+    /* Remover o a fotinha do git
+    ._profileContainer_51w34_53
+    {
+        visibility: hidden;
+    }
     </style>
     """,
     unsafe_allow_html=True
