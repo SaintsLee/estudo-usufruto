@@ -1,0 +1,2 @@
+dados_completos__retornos_brotli.parquet filter=lfs diff=lfs merge=lfs -text
+dados_completos_brotli.parquet filter=lfs diff=lfs merge=lfs -text
