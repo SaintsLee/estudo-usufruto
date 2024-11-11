@@ -35,9 +35,9 @@ col1, col2 = st.columns(2)
 
 # Exibir sliders em cada coluna
 with col1:
-    periodo_carteira = st.slider("# Período para a carteira", 10, 30, 10, 2)
+    periodo_carteira = st.slider("# Período de usufruto da carteira", 10, 30, 10, 2)
 with col2:
-    taxa_carteira = st.slider("# Taxa para a carteira", 2.5, 7.0, 2.5, 0.5)
+    taxa_carteira = st.slider("# Taxa de retirada para o usufruto", 2.5, 7.0, 2.5, 0.5)
 
 st.markdown(
     """
