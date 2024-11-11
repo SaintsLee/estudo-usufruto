@@ -1,6 +1,7 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+
 st.set_page_config(layout="wide", page_title="Estudo Usufruto",page_icon = "portfel_logo.ico")
 
 st.markdown(
@@ -150,9 +151,10 @@ periodo_carteiras = ["10 Anos",
 carteiras_pl = dados_completos[(dados_completos["Taxa"] == "{:.2f}%".format(taxa_carteira)) &
                                (dados_completos["Periodo"] == "{} Anos".format(periodo_carteira))].copy()
 
-carteiras_pl_tratada = carteiras_pl.drop(columns=["Taxa", "Periodo"])
+cap_inicial = 3000000
+carteiras_pl_tratada = carteiras_pl.drop(columns=["Taxa", "Periodo"])/cap_inicial*100
 
-box_plot_1 = desenha_box_formatado(carteiras_pl_tratada,"Patrimônio Final [R$]","Carteiras")
+box_plot_1 = desenha_box_formatado(carteiras_pl_tratada,"Patrimônio Final [%]","Carteiras")
 
 draw_downs_totais = pd.DataFrame(columns=["Conservadora", "Moderada", "Arrojada", "Agressiva"])
 for i in range(len(nomes_carteiras)):
