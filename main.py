@@ -2,13 +2,15 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-tema_base = st.get_option("theme.base")
+tema_atual = st.get_option("theme.base")
 
 st.set_page_config(layout="wide", page_title="Estudo Usufruto",page_icon = "portfel_logo.ico")
 
+st.image("portfel-curve-logo.svg", width = 250, output_format  = "png")
+
 st.title("Análise do patrimônio final")
 
-if tema_base == "dark":
+if tema_atual == "dark":
     bckgroud_color = "#0E1117"
     txt_color = "#FAFAFA"
     zero_line = "#FFFFFF"
@@ -330,7 +332,7 @@ with col2:
     box_plot_2 = desenha_box_formatado(draw_downs_totais * 100, "Drawdown [%]", "Carteiras")
 
     st.markdown("#### Dispersão do Drawdown")
-    st.write("Taxa: {:.2f}%".format(taxa_carteira))
+    st.write("Periodo: {} Anos".format(periodo_carteira))
     st.plotly_chart(box_plot_2, use_container_width=False)
     #_______________________________________________________
 
