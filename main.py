@@ -336,7 +336,7 @@ with col2:
                                         janela_analise,
                                         opcoes_label2[opcao_radio2])
 
-    box_plot_4 = desenha_linha_formatado(volatilidade*100, "Retornos [%]", "Carteiras")
+    box_plot_4 = desenha_linha_formatado(volatilidade*100, "Volatilidade [%]", "Carteiras")
 
     st.plotly_chart(box_plot_4, use_container_width=False)
     #_______________________________________________________
