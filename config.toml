@@ -1,3 +1,2 @@
 [theme]
-base="light"
-primaryColor="#ff0000"
+base = "dark"
