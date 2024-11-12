@@ -1,9 +1,24 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
-import plotly.colors as pc
+
+tema_base = st.get_option("theme.base")
 
 st.set_page_config(layout="wide", page_title="Estudo Usufruto",page_icon = "portfel_logo.ico")
+
+st.title("Análise do patrimônio final")
+
+if tema_base == "dark":
+    bckgroud_color = "#0E1117"
+    txt_color = "#FAFAFA"
+    zero_line = "#FFFFFF"
+    fillcolor = "#A0A0A0"
+else:
+    bckgroud_color = "#FFFFFF"
+    txt_color = "#31333F"
+    zero_line = "#000000"
+    fillcolor = "#4A4A4A"
+
 
 st.markdown(
     """
@@ -16,6 +31,26 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Dividir em duas colunas
+col1, col2 = st.columns(2)
+
+# Exibir sliders em cada coluna
+st.markdown(
+    """
+    <style>
+    .stSlider label {
+        font-size: 20px; /* Aumente o valor para ajustar o tamanho */
+        font-weight: bold; /* Opcional: para tornar o texto mais destacado */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+with col1:
+    periodo_carteira = st.slider("# Período de usufruto da carteira", 10, 30, 10, 2)
+with col2:
+    taxa_carteira = st.slider("# Taxa de retirada para o usufruto", 2.5, 7.0, 2.5, 0.5)
+
 @st.cache_data
 def load_data():
     dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
@@ -25,8 +60,6 @@ def load_data():
     return dados_completos, dados_completos_retornos
 
 dados_completos, dados_completos_retornos = load_data()
-
-st.title("Análise do patrimônio final")
 
 st.markdown(
     """
@@ -76,7 +109,7 @@ def calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras
             retornos = dados_completos_retornos[
                 (dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
                 & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
-                    0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().median(axis = 0)
+                    0])].drop(columns=["Carteira", "Periodo"]).iloc[-1]/3000000 - 1
 
             retornos_totais[nomes_carteiras[i].split()[0]] = retornos
     elif opcao == 4:
@@ -112,7 +145,7 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
         for i in range(len(nomes_carteiras)):
             vols = dados_completos_retornos[(dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
                                                 & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
-                0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).std().median(axis=0)
+                0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().std()
 
             vols_totais[nomes_carteiras[i].split()[0]] = vols
 
@@ -129,43 +162,43 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
 def desenha_box_formatado(dataset, titulo_y, titulo_x):
     fig = px.box(dataset, color_discrete_sequence=["black"])
 
-    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=False, height=650, plot_bgcolor='white',
+    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=False, height=650, plot_bgcolor=bckgroud_color,
                       xaxis=dict(
-                          tickfont=dict(size=18, color = "#31333F"),  # Tamanho da fonte para os números no eixo X
+                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo X
                       ),
                       yaxis=dict(
-                          tickfont=dict(size=18, color = "#31333F"),  # Tamanho da fonte para os números no eixo Y
+                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo Y
 
                       ),
-                      xaxis_title_font=dict(size=18, color = "#31333F"),  # Tamanho da fonte do eixo X
-                      yaxis_title_font=dict(size=18, color = "#31333F"),  # Tamanho da fonte do eixo Y
+                      xaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo X
+                      yaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo Y
                       )
 
     # Personalizar o grid
     fig.update_xaxes(
         showgrid=False,  # Exibir a grade no eixo X
-        gridcolor='lightgrey',  # Cor das linhas da grade
+        gridcolor=txt_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo X)
-        zerolinecolor='#31333F',  # Cor da linha de zero
-        zerolinewidth=1,  # Largura da linha de zero
+        zerolinecolor=txt_color,  # Cor da linha de zero
+        zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor='#31333F',  # Cor da linha do eixo
-        linewidth=1,  # Largura da linha do eixo,
+        linecolor=txt_color,  # Cor da linha do eixo
+        linewidth=0.8,  # Largura da linha do eixo,
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
     )
 
     fig.update_yaxes(
         showgrid=True,  # Exibir a grade no eixo Y
-        gridcolor='lightgrey',  # Cor das linhas da grade
+        gridcolor=txt_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo Y)
-        zerolinecolor='black',  # Cor da linha de zero
-        zerolinewidth=1,  # Largura da linha de zero
+        zerolinecolor=zero_line,  # Cor da linha de zero
+        zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor='black',  # Cor da linha do eixo
-        linewidth=1,  # Largura da linha do eixo
+        linecolor=txt_color,  # Cor da linha do eixo
+        linewidth=0.8,  # Largura da linha do eixo
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
     )
@@ -174,55 +207,55 @@ def desenha_box_formatado(dataset, titulo_y, titulo_x):
     # "#392B84"
     fig.update_traces(
         marker_color="Red",  # Cor da caixa
-        line_color="#272727",  # Cor da linha da borda
-        fillcolor="#6E6E6E",
-        marker_size=5,  # Tamanho dos pontos
+        line_color=txt_color,  # Cor da linha da borda
+        fillcolor=fillcolor,
+        marker_size=4,  # Tamanho dos pontos
         marker_opacity=1  # Opacidade dos pontos
     )
     return fig
 
 
 def desenha_linha_formatado(dataset, titulo_y, titulo_x):
-    fig = px.line(dataset, color_discrete_sequence = px.colors.diverging.RdBu)
+    fig = px.line(dataset)
 
-    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=True, height=650, plot_bgcolor='white',
+    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=True, legend_title_text = "Carteiras",height=650, plot_bgcolor=bckgroud_color,
                       xaxis=dict(
-                          tickfont=dict(size=18, color = "#31333F"),  # Tamanho da fonte para os números no eixo X
+                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo X
                           showticklabels = False
                       ),
                       yaxis=dict(
-                          tickfont=dict(size=18, color = "#31333F"),  # Tamanho da fonte para os números no eixo Y
+                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo Y
 
                       ),
-                      xaxis_title_font=dict(size=18, color = "#31333F"),  # Tamanho da fonte do eixo X
-                      yaxis_title_font=dict(size=18, color = "#31333F"),  # Tamanho da fonte do eixo Y
+                      xaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo X
+                      yaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo Y
                       )
 
     # Personalizar o grid
     fig.update_xaxes(
         showgrid=False,  # Exibir a grade no eixo X
-        gridcolor='lightgrey',  # Cor das linhas da grade
+        gridcolor=txt_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo X)
-        zerolinecolor='#31333F',  # Cor da linha de zero
-        zerolinewidth=1,  # Largura da linha de zero
+        zerolinecolor=zero_line,  # Cor da linha de zero
+        zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor='#31333F',  # Cor da linha do eixo
-        linewidth=1,  # Largura da linha do eixo,
+        linecolor=txt_color,  # Cor da linha do eixo
+        linewidth=0.8,  # Largura da linha do eixo,
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
     )
 
     fig.update_yaxes(
         showgrid=True,  # Exibir a grade no eixo Y
-        gridcolor='lightgrey',  # Cor das linhas da grade
+        gridcolor=txt_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo Y)
-        zerolinecolor='black',  # Cor da linha de zero
-        zerolinewidth=1,  # Largura da linha de zero
+        zerolinecolor=txt_color,  # Cor da linha de zero
+        zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor='black',  # Cor da linha do eixo
-        linewidth=1,  # Largura da linha do eixo
+        linecolor=txt_color,  # Cor da linha do eixo
+        linewidth=0.8,  # Largura da linha do eixo
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
     )
@@ -246,26 +279,6 @@ periodo_carteiras = ["10 Anos",
                      "28 Anos",
                      "30 Anos"]
 
-# Dividir em duas colunas
-col1, col2 = st.columns(2)
-
-# Exibir sliders em cada coluna
-st.markdown(
-    """
-    <style>
-    .stSlider label {
-        font-size: 20px; /* Aumente o valor para ajustar o tamanho */
-        font-weight: bold; /* Opcional: para tornar o texto mais destacado */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-with col1:
-    periodo_carteira = st.slider("# Período de usufruto da carteira", 10, 30, 10, 2)
-with col2:
-    taxa_carteira = st.slider("# Taxa de retirada para o usufruto", 2.5, 7.0, 2.5, 0.5)
-
 # Exibir gráficos em cada coluna
 with col1:
     # Box Plot 1 - Disperssão do PL
@@ -283,18 +296,18 @@ with col1:
     # _______________________________________________________
 
     # Box Plot 3 - Retorno das Carteiras
-    st.markdown("#### Retornos das carteiras")
-    opcoes_label1 = {"Carteira com maior retorno":  1,
-                     "Carteira com menor retorno":  2,
-                     "Mediana":                     3,
-                     "Média de todas as carteiras": 4}
+    st.markdown(f"#### Análise dos retornos no período: {periodo_carteira} Anos")
+    opcoes_label1 = {f"Maior retorno [mensal] no periodo":                   1,
+                     f"Menor retorno [mensal] no periodo":                   2,
+                     f"Retorno total no periodo de {periodo_carteira} Anos": 3,
+                     f"Média dos retornos [mensal] no período":              4}
 
     opcao_radio1 = st.radio("Opções interessantes para análise:", list(opcoes_label1.keys()),label_visibility="hidden")
     retornos = calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras, opcoes_label1[opcao_radio1])
 
     st.markdown(
         """
-        <div style="margin-top: 77px;"></div>
+        <div style="margin-top: 82px;"></div>
         """,
         unsafe_allow_html=True
     )
@@ -322,11 +335,11 @@ with col2:
     #_______________________________________________________
 
     # Box Plot 4 - Disperssão da Volatilidade
-    st.markdown("#### Volatilidade das carteiras")
-    opcoes_label2 = {"Carteira com maior volatilidade": 1,
-                     "Carteira com menor volatilidade": 2,
-                     "Mediana":                         3,
-                     "Média de todas as carteiras":     4}
+    st.markdown(f"#### Análise das volatilidades no período: {periodo_carteira} Anos")
+    opcoes_label2 = {f"Maior volatilidade [mensal] no periodo":                   1,
+                     f"Menor volatilidade [mensal] no periodo":                   2,
+                     f"Volatilidade total no período de {periodo_carteira} Anos": 3,
+                     f"Média das volatilidades [mensal] no periodo":              4}
 
     opcao_radio2 = st.radio("Opções interessantes para análise:", list(opcoes_label2.keys()),label_visibility="hidden")
     janela_analise = st.slider("# Período da volatilidade móvel [meses]", 2, 24, 2, 1)
@@ -340,3 +353,5 @@ with col2:
 
     st.plotly_chart(box_plot_4, use_container_width=False)
     #_______________________________________________________
+
+
