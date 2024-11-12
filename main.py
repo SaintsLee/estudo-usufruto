@@ -54,37 +54,34 @@ def calcula_drawdown(dataset):
     drawdown_max = drawdowns.min()
     return drawdowns, drawdown_max
 
-def calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras, opcao):
+def calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras,periodo_movel, opcao):
     retornos_totais = pd.DataFrame(columns=["Conservadora", "Moderada", "Arrojada", "Agressiva"])
     if opcao == 1:
         for i in range(len(nomes_carteiras)):
             retornos = dados_completos_retornos[(dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
                                                 & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
-                0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().max(axis=0)
+                0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).max(axis=0)
 
             retornos_totais[nomes_carteiras[i].split()[0]] = retornos
     elif opcao == 2:
         for i in range(len(nomes_carteiras)):
-            retornos = dados_completos_retornos[
-                (dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
-                & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
-                    0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().min(axis=0)
+            retornos = dados_completos_retornos[(dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
+                                                & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
+                0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).min(axis=0)
 
             retornos_totais[nomes_carteiras[i].split()[0]] = retornos
     elif opcao == 3:
         for i in range(len(nomes_carteiras)):
-            retornos = dados_completos_retornos[
-                (dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
-                & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
-                    0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().median(axis = 0)
+            retornos = dados_completos_retornos[(dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
+                                                & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
+                0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).median(axis = 0)
 
             retornos_totais[nomes_carteiras[i].split()[0]] = retornos
     elif opcao == 4:
         for i in range(len(nomes_carteiras)):
-            retornos = dados_completos_retornos[
-                (dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
-                & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
-                    0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().mean(axis=0)
+            retornos = dados_completos_retornos[(dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
+                                                & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
+                0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).mean(axis=0)
 
             retornos_totais[nomes_carteiras[i].split()[0]] = retornos
 
@@ -290,14 +287,10 @@ with col1:
                      "Média de todas as carteiras": 4}
 
     opcao_radio1 = st.radio("Opções interessantes para análise:", list(opcoes_label1.keys()),label_visibility="hidden")
-    retornos = calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras, opcoes_label1[opcao_radio1])
+    janela_analise2 = st.slider("# Período da volatilidade móvel [meses]", 2, 24, 2, 1)
+    retornos = calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras,janela_analise2, opcoes_label1[opcao_radio1])
 
-    st.markdown(
-        """
-        <div style="margin-top: 77px;"></div>
-        """,
-        unsafe_allow_html=True
-    )
+
 
     box_plot_3 = desenha_box_formatado(retornos*100, "Retornos [%]", "Carteiras")
     st.plotly_chart(box_plot_3, use_container_width=False)
