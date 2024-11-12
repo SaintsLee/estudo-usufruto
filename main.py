@@ -287,7 +287,7 @@ with col1:
                      "Média de todas as carteiras": 4}
 
     opcao_radio1 = st.radio("Opções interessantes para análise:", list(opcoes_label1.keys()),label_visibility="hidden")
-    janela_analise2 = st.slider("# Período da volatilidade móvel [meses]", 2, 24, 2, 1)
+    janela_analise2 = st.slider("# Período do retorno móvel [meses]", 2, 24, 2, 1)
     retornos = calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras,janela_analise2, opcoes_label1[opcao_radio1])
 
 
