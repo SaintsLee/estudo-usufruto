@@ -299,7 +299,7 @@ with col1:
 
     st.markdown("#### Dispersão do patrimônio")
     st.write("Taxa: {:.2f}% e Período: {} Anos".format(taxa_carteira,periodo_carteira))
-    col1_1, col1_2 = st.columns([1,6])
+    col1_1, col1_2 = st.columns([1,5])
 
     col1_2.plotly_chart(box_plot_1, use_container_width=False)
 
