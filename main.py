@@ -296,26 +296,35 @@ with col1:
 
     box_plot_1 = desenha_box_formatado(carteiras_pl_tratada, "Patrimônio final para cada simulação","Patrimônio Final [%]", "Carteiras")
 
+    col_1_1_1, col_1_1_2 = st.columns(2)
+    with col_1_1_1:
+        st.markdown("#### Dispersão do patrimônio")
+        st.write("Taxa: {:.2f}% e Período: {} Anos".format(taxa_carteira, periodo_carteira))
+    with col_1_1_2:
+        st.write("")
+        st.write("")
+        survival_check = st.checkbox("Sobrevivência", value=False)
 
-    st.markdown("#### Dispersão do patrimônio")
-    st.write("Taxa: {:.2f}% e Período: {} Anos".format(taxa_carteira,periodo_carteira))
-    col1_1, col1_2 = st.columns([1,5])
-
-    col1_2.plotly_chart(box_plot_1, use_container_width=False)
-
-    col1_1.write("")
-    col1_1.write("")
-    col1_1.write("")
-    col1_1.write("")
-    col1_1.write("")
-    col1_1.write("")
-    col1_1.write("")
-    col1_1.write("")
-    col1_1.markdown("##### Taxa de Sobrevivência")
-    col1_1.metric("Conservadora",str(survival_total.loc["Conservadora"][0]))
-    col1_1.metric("Moderada",str(survival_total.loc["Moderada"][0]))
-    col1_1.metric("Arrojada",str(survival_total.loc["Arrojada"][0]))
-    col1_1.metric("Agressiva",str(survival_total.loc["Agressiva"][0]))
+    if survival_check:
+        col1_1, col1_2 = st.columns([1,5])
+        with col1_1:
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.markdown("##### Taxa de Sobrevivência")
+            st.metric("Conservadora",str(survival_total.loc["Conservadora"].iloc[0]))
+            st.metric("Moderada",str(survival_total.loc["Moderada"].iloc[0]))
+            st.metric("Arrojada",str(survival_total.loc["Arrojada"].iloc[0]))
+            st.metric("Agressiva",str(survival_total.loc["Agressiva"].iloc[0]))
+        with col1_2:
+            st.plotly_chart(box_plot_1, use_container_width=False)
+    else:
+        st.plotly_chart(box_plot_1, use_container_width=False)
 
     # _______________________________________________________
 
@@ -375,5 +384,3 @@ with col2:
 
     st.plotly_chart(box_plot_4, use_container_width=False)
     #_______________________________________________________
-
-
