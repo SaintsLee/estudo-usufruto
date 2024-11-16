@@ -4,10 +4,13 @@ import plotly.express as px
 
 tema_atual = st.get_option("theme.base")
 
-st.set_page_config(layout="wide", page_title="Estudo Usufruto",page_icon = "portfel_logo.ico")
+# Configuração da página
+st.set_page_config(layout="wide", page_title="Estudo Usufruto", page_icon = "portfel_logo.ico")
 
+# Imagem do logo Portfel
 st.image("portfel-curve-logo.svg", width = 250, output_format  = "png")
 
+# Título do Dashboard
 st.title("Análise do patrimônio final")
 
 if tema_atual == "dark":
@@ -21,7 +24,7 @@ else:
     zero_line = "#000000"
     fillcolor = "#4A4A4A"
 
-
+# Distância do canto superior da página
 st.markdown(
     """
     <style>
@@ -48,11 +51,13 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 with col1:
     periodo_carteira = st.slider("# Período de usufruto da carteira", 10, 30, 20, 2)
 with col2:
     taxa_carteira = st.slider("# Taxa de retirada para o usufruto", 2.5, 7.0, 3.5, 0.5)
 
+# Armazenamento em cache da base de dados a ser apresentada no dashboard
 @st.cache_data
 def load_data():
     dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
@@ -63,6 +68,7 @@ def load_data():
 
 dados_completos, dados_completos_retornos = load_data()
 
+# Remoção do valor que fica embaixo do slider
 st.markdown(
     """
     <style>
@@ -82,6 +88,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+# Função para o cálculo do Drawdown
 def calcula_drawdown(dataset):
     retornos = dataset.cummax()
 
@@ -89,6 +96,7 @@ def calcula_drawdown(dataset):
     drawdown_max = drawdowns.min()
     return drawdowns, drawdown_max
 
+# Função para o cálculo dos retornos
 def calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras, periodo_movel,opcao):
     retornos_totais = pd.DataFrame(columns=["Conservadora", "Moderada", "Arrojada", "Agressiva"])
     if opcao == 1:
@@ -125,6 +133,7 @@ def calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras
 
     return retornos_totais
 
+# Função para o cálculo das volatilidades
 def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carteiras, periodo_movel,opcao):
     vols_totais = pd.DataFrame(columns=["Conservadora", "Moderada", "Arrojada", "Agressiva"])
     if opcao == 1:
@@ -161,6 +170,7 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
 
     return vols_totais
 
+# Função para a formatação dos gráficos Boxplot
 def desenha_box_formatado(dataset, title, titulo_y, titulo_x):
     fig = px.box(dataset, color_discrete_sequence=["black"], title = title)
 
@@ -216,7 +226,7 @@ def desenha_box_formatado(dataset, title, titulo_y, titulo_x):
     )
     return fig
 
-
+# Função para a formatação dos gráficos Linha
 def desenha_linha_formatado(dataset, title,titulo_y, titulo_x):
     fig = px.line(dataset, title = title)
 
@@ -264,6 +274,7 @@ def desenha_linha_formatado(dataset, title,titulo_y, titulo_x):
 
     return fig
 
+# Definição do nome e dos períodos das carteiras assim como foi feito na criação dos dados pela simulação
 nomes_carteiras = ["Conservadora - Análise PL",
                    "Moderada - Análise PL",
                    "Arrojada - Análise PL",
@@ -288,22 +299,20 @@ with col1:
     carteiras_pl = dados_completos[(dados_completos["Taxa"] == "{:.2f}%".format(taxa_carteira)) &
                                    (dados_completos["Periodo"] == "{} Anos".format(periodo_carteira))].copy()
 
+    # Cálculo do PL final em %
     carteiras_pl_tratada = carteiras_pl.drop(columns=["Taxa", "Periodo"]) / cap_inicial * 100
-
-    survival = carteiras_pl.drop(columns=["Taxa", "Periodo"])/cap_inicial*100
-    survival_total = pd.DataFrame()
-    survival_total["Sobrevivência"] = ((1 - (survival == 0).sum(axis = 0)/survival.shape[0])*100).apply(lambda x: f'{x:.2f}%')
 
     box_plot_1 = desenha_box_formatado(carteiras_pl_tratada, "Patrimônio final para cada simulação","Patrimônio Final [%]", "Carteiras")
 
+    # Criação do layout do primeiro gráfico, com sidebar caso opte por observar a taxa de sobrevivência
     col_1_1_1, col_1_1_2 = st.columns(2)
     with col_1_1_1:
         st.markdown("#### Dispersão do patrimônio")
-        st.write("Taxa: {:.2f}% e Período: {} Anos".format(taxa_carteira, periodo_carteira))
+        st.write("Taxa: **{:.2f} %** - Período: **{} Anos**".format(taxa_carteira,periodo_carteira))
     with col_1_1_2:
         st.write("")
         st.write("")
-        survival_check = st.checkbox("Sobrevivência", value=False)
+        survival_check = st.checkbox("Sobrevivência das carteiras", value=False)
 
     if survival_check:
         col1_1, col1_2 = st.columns([1,5])
@@ -315,12 +324,43 @@ with col1:
             st.write("")
             st.write("")
             st.write("")
-            st.write("")
             st.markdown("##### Taxa de Sobrevivência")
-            st.metric("Conservadora",str(survival_total.loc["Conservadora"].iloc[0]))
-            st.metric("Moderada",str(survival_total.loc["Moderada"].iloc[0]))
-            st.metric("Arrojada",str(survival_total.loc["Arrojada"].iloc[0]))
-            st.metric("Agressiva",str(survival_total.loc["Agressiva"].iloc[0]))
+
+            # Cálculo da taxa de sobrevivência
+            survival = carteiras_pl.drop(columns=["Taxa", "Periodo"]) / cap_inicial * 100
+            survival_total = pd.DataFrame()
+            survival_total["Sobrevivência"] = (
+                        (1 - (survival == 0).sum(axis=0) / survival.shape[0]) * 100)  # .apply(lambda x: f'{x:.2f}')
+
+            # Seleção da taxa de sobrevivência
+            survival_conservadora = survival_total.loc["Conservadora"].iloc[0]
+            survival_moderada = survival_total.loc["Moderada"].iloc[0]
+            survival_arrojada = survival_total.loc["Arrojada"].iloc[0]
+            survival_agressiva = survival_total.loc["Agressiva"].iloc[0]
+
+            # Seleção dos limites para a troca de cor em %
+            lim_inferior = 30
+            lim_superior = 80
+
+            # Função para formatar a cor da taxa de sobrevivência
+            def formata_sidebar_survival(nome,valor,min,max):
+                if valor <= min:
+                    texto_formatado = f"**{nome}**\n#### :red[{valor:.2f}%]"
+                elif (valor > min) and (valor <= max):
+                    texto_formatado = f"**{nome}**\n#### :orange[{valor:.2f}%]"
+                else:
+                    texto_formatado = f"**{nome}**\n#### :green[{valor:.2f}%]"
+                return texto_formatado
+
+            # Formatação
+            st.write(formata_sidebar_survival("Conservadora",survival_conservadora,lim_inferior,lim_superior))
+            # --------------------------------------------------------------------------------------------
+            st.write(formata_sidebar_survival("Moderada",survival_moderada,lim_inferior,lim_superior))
+            # --------------------------------------------------------------------------------------------
+            st.write(formata_sidebar_survival("Arrojada",survival_arrojada,lim_inferior,lim_superior))
+            # --------------------------------------------------------------------------------------------
+            st.write(formata_sidebar_survival("Agressiva",survival_agressiva,lim_inferior,lim_superior))
+
         with col1_2:
             st.plotly_chart(box_plot_1, use_container_width=False)
     else:
@@ -361,7 +401,7 @@ with col2:
     box_plot_2 = desenha_box_formatado(draw_downs_totais * 100, "Máximo drawdown no período para cada simulação","Drawdown [%]", "Carteiras")
 
     st.markdown("#### Dispersão do Drawdown")
-    st.write("Periodo: {} Anos".format(periodo_carteira))
+    st.write("Periodo: **{} Anos**".format(periodo_carteira))
     st.plotly_chart(box_plot_2, use_container_width=False)
     #_______________________________________________________
 
