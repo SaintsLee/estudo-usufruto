@@ -2,27 +2,34 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-tema_atual = st.get_option("theme.base")
-
 # Configuração da página
 st.set_page_config(layout="wide", page_title="Estudo Usufruto", page_icon = "portfel_logo.ico")
 
 # Imagem do logo Portfel
-st.image("portfel-curve-logo.svg", width = 250, output_format  = "png")
+st.image("portfel-curve-logo.svg", width=250, output_format="png")
 
 # Título do Dashboard
-st.title("Análise do patrimônio final")
+st.title("Carteiras de Usufruto - Uma análise de desempenho")
 
-if tema_atual == "dark":
-    bckgroud_color = "#0E1117"
-    txt_color = "#FAFAFA"
+# Criação dos containers principais
+container_topo = st.container()
+container_baixo = st.container()
+
+# Cor do tema
+tema = False
+if tema:
+    back_color = "#0E1117"
+    text_color = "#FAFAFA"
     zero_line = "#FFFFFF"
-    fillcolor = "#A0A0A0"
+    fil_color = "#A0A0A0"
 else:
-    bckgroud_color = "#FFFFFF"
-    txt_color = "#31333F"
+    back_color = "#FFFFFF"
+    text_color = "#31333F"
     zero_line = "#000000"
-    fillcolor = "#4A4A4A"
+    fil_color = "#4A4A4A"
+
+# Dividir em duas colunas
+col1, col2 = st.columns(2)
 
 # Distância do canto superior da página
 st.markdown(
@@ -36,9 +43,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Dividir em duas colunas
-col1, col2 = st.columns(2)
-
 # Exibir sliders em cada coluna
 st.markdown(
     """
@@ -51,24 +55,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-with col1:
-    periodo_carteira = st.slider("# Período de usufruto da carteira", 10, 30, 20, 2)
-with col2:
-    taxa_carteira = st.slider("# Taxa de retirada para o usufruto", 2.5, 7.0, 3.5, 0.5)
-
-# Armazenamento em cache da base de dados a ser apresentada no dashboard
-@st.cache_data
-def load_data():
-    dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
-
-    dados_completos_retornos = pd.read_parquet("dados_completos__retornos_brotli.parquet")
-
-    return dados_completos, dados_completos_retornos
-
-dados_completos, dados_completos_retornos = load_data()
-
-# Remoção do valor que fica embaixo do slider
+# Remoção do valor que fica em baixo do slider
 st.markdown(
     """
     <style>
@@ -87,6 +74,17 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Armazenamento em cache da base de dados a ser apresentada no dashboard
+@st.cache_data
+def load_data():
+    dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
+
+    dados_completos_retornos = pd.read_parquet("dados_completos__retornos_brotli.parquet")
+
+    return dados_completos, dados_completos_retornos
+
+dados_completos, dados_completos_retornos = load_data()
 
 # Função para o cálculo do Drawdown
 def calcula_drawdown(dataset):
@@ -174,28 +172,28 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
 def desenha_box_formatado(dataset, title, titulo_y, titulo_x):
     fig = px.box(dataset, color_discrete_sequence=["black"], title = title)
 
-    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=False, height=650, plot_bgcolor=bckgroud_color,
+    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=False, height=650, plot_bgcolor=back_color,
                       xaxis=dict(
-                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo X
+                          tickfont=dict(size=18, color = text_color),  # Tamanho da fonte para os números no eixo X
                       ),
                       yaxis=dict(
-                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo Y
+                          tickfont=dict(size=18, color = text_color),  # Tamanho da fonte para os números no eixo Y
 
                       ),
-                      xaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo X
-                      yaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo Y
+                      xaxis_title_font=dict(size=18, color = text_color),  # Tamanho da fonte do eixo X
+                      yaxis_title_font=dict(size=18, color = text_color),  # Tamanho da fonte do eixo Y
                       )
 
     # Personalizar o grid
     fig.update_xaxes(
         showgrid=False,  # Exibir a grade no eixo X
-        gridcolor=txt_color,  # Cor das linhas da grade
+        gridcolor=text_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo X)
-        zerolinecolor=txt_color,  # Cor da linha de zero
+        zerolinecolor=text_color,  # Cor da linha de zero
         zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor=txt_color,  # Cor da linha do eixo
+        linecolor=text_color,  # Cor da linha do eixo
         linewidth=0.8,  # Largura da linha do eixo,
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
@@ -203,13 +201,13 @@ def desenha_box_formatado(dataset, title, titulo_y, titulo_x):
 
     fig.update_yaxes(
         showgrid=True,  # Exibir a grade no eixo Y
-        gridcolor=txt_color,  # Cor das linhas da grade
+        gridcolor=text_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo Y)
         zerolinecolor=zero_line,  # Cor da linha de zero
         zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor=txt_color,  # Cor da linha do eixo
+        linecolor=text_color,  # Cor da linha do eixo
         linewidth=0.8,  # Largura da linha do eixo
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
@@ -219,8 +217,8 @@ def desenha_box_formatado(dataset, title, titulo_y, titulo_x):
     # "#392B84"
     fig.update_traces(
         marker_color="Red",  # Cor da caixa
-        line_color=txt_color,  # Cor da linha da borda
-        fillcolor=fillcolor,
+        line_color=text_color,  # Cor da linha da borda
+        fillcolor=fil_color,
         marker_size=4,  # Tamanho dos pontos
         marker_opacity=1  # Opacidade dos pontos
     )
@@ -228,31 +226,35 @@ def desenha_box_formatado(dataset, title, titulo_y, titulo_x):
 
 # Função para a formatação dos gráficos Linha
 def desenha_linha_formatado(dataset, title,titulo_y, titulo_x):
-    fig = px.line(dataset, title = title)
+    cores_personalizadas = ["#6faf5f","#dfe300","#fca620", "#ff0100"]
 
-    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=True, legend_title_text = "Carteiras",height=650, plot_bgcolor=bckgroud_color,
+    fig = px.line(dataset,
+                  title = title,
+                  color_discrete_sequence= cores_personalizadas)
+
+    fig.update_layout(xaxis_title=titulo_x, yaxis_title=titulo_y, showlegend=True, legend_title_text = "Carteiras",height=650, plot_bgcolor=back_color,
                       xaxis=dict(
-                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo X
+                          tickfont=dict(size=18, color = text_color),  # Tamanho da fonte para os números no eixo X
                           showticklabels = False
                       ),
                       yaxis=dict(
-                          tickfont=dict(size=18, color = txt_color),  # Tamanho da fonte para os números no eixo Y
+                          tickfont=dict(size=18, color = text_color),  # Tamanho da fonte para os números no eixo Y
 
                       ),
-                      xaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo X
-                      yaxis_title_font=dict(size=18, color = txt_color),  # Tamanho da fonte do eixo Y
+                      xaxis_title_font=dict(size=18, color = text_color),  # Tamanho da fonte do eixo X
+                      yaxis_title_font=dict(size=18, color = text_color),  # Tamanho da fonte do eixo Y
                       )
 
     # Personalizar o grid
     fig.update_xaxes(
         showgrid=False,  # Exibir a grade no eixo X
-        gridcolor=txt_color,  # Cor das linhas da grade
+        gridcolor=text_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo X)
         zerolinecolor=zero_line,  # Cor da linha de zero
         zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor=txt_color,  # Cor da linha do eixo
+        linecolor=text_color,  # Cor da linha do eixo
         linewidth=0.8,  # Largura da linha do eixo,
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
@@ -260,17 +262,56 @@ def desenha_linha_formatado(dataset, title,titulo_y, titulo_x):
 
     fig.update_yaxes(
         showgrid=True,  # Exibir a grade no eixo Y
-        gridcolor=txt_color,  # Cor das linhas da grade
+        gridcolor=text_color,  # Cor das linhas da grade
         gridwidth=0.5,  # Largura das linhas da grade
         zeroline=True,  # Exibir linha de zero (para eixo Y)
-        zerolinecolor=txt_color,  # Cor da linha de zero
+        zerolinecolor=text_color,  # Cor da linha de zero
         zerolinewidth=1.2,  # Largura da linha de zero
         showline=True,  # Exibir a linha do eixo
-        linecolor=txt_color,  # Cor da linha do eixo
+        linecolor=text_color,  # Cor da linha do eixo
         linewidth=0.8,  # Largura da linha do eixo
         griddash='dot',
         layer="below traces"  # Coloca o Grid atrás
     )
+
+    return fig
+
+# Função para a formatação dos gráficos Treemap
+def desenha_treemap_formatado(dataset, title):
+    # Lista de cores customizadas
+    cores_personalizadas = ["#6faf5f","#dfe300","#fca620", "#ff0100"]
+
+    fig = px.treemap(dataset,
+                     path= [px.Constant("Carteiras"), 'Tipo', 'Classe', 'Ativos'],
+                     values="Pesos",
+                     title=title,
+                     hover_data = {"Pesos":":.2f%"},
+                     color_discrete_sequence= cores_personalizadas
+                     )
+
+    fig.update_layout(showlegend=True, legend_title_text="Carteiras",
+                      height=800, plot_bgcolor=back_color,
+                      xaxis=dict(
+                          tickfont=dict(size=18, color=text_color),  # Tamanho da fonte para os números no eixo X
+                          showticklabels=False
+                      ),
+                      yaxis=dict(
+                          tickfont=dict(size=18, color=text_color),  # Tamanho da fonte para os números no eixo Y
+
+                      ),
+                      xaxis_title_font=dict(size=18, color=text_color),  # Tamanho da fonte do eixo X
+                      yaxis_title_font=dict(size=18, color=text_color),  # Tamanho da fonte do eixo Y
+                      font=dict(color="rgba(0,0,0,0)") # Altera a cor do nó raíz
+                      )
+    fig.update_traces(
+        hovertemplate="<b>%{label}</b><br>Peso: %{value}%<br><extra></extra>",
+        texttemplate='%{label}<br>%{value}%',
+        textfont_size = 16,
+        textposition = "middle center",
+        marker_line_color = "white",
+        root_color= "rgba(0,0,0,0)"
+    )
+
 
     return fig
 
@@ -292,135 +333,274 @@ periodo_carteiras = ["10 Anos",
                      "28 Anos",
                      "30 Anos"]
 
-# Exibir gráficos em cada coluna
-with col1:
-    # Box Plot 1 - Disperssão do PL
-    cap_inicial = 3000000
-    carteiras_pl = dados_completos[(dados_completos["Taxa"] == "{:.2f}%".format(taxa_carteira)) &
-                                   (dados_completos["Periodo"] == "{} Anos".format(periodo_carteira))].copy()
+with container_baixo:
 
-    # Cálculo do PL final em %
-    carteiras_pl_tratada = carteiras_pl.drop(columns=["Taxa", "Periodo"]) / cap_inicial * 100
+    with col1:
+        periodo_carteira = st.slider("# Período de usufruto da carteira", 10, 30, 20, 2)
+    with col2:
+        taxa_carteira = st.slider("# Taxa de retirada para o usufruto", 2.5, 7.0, 3.5, 0.5)
 
-    box_plot_1 = desenha_box_formatado(carteiras_pl_tratada, "Patrimônio final para cada simulação","Patrimônio Final [%]", "Carteiras")
+    # Exibir gráficos em cada coluna
+    with col1:
 
-    # Criação do layout do primeiro gráfico, com sidebar caso opte por observar a taxa de sobrevivência
-    col_1_1_1, col_1_1_2 = st.columns(2)
-    with col_1_1_1:
-        st.markdown("#### Dispersão do patrimônio")
-        st.write("Taxa: **{:.2f} %** - Período: **{} Anos**".format(taxa_carteira,periodo_carteira))
-    with col_1_1_2:
-        st.write("")
-        st.write("")
-        survival_check = st.checkbox("Sobrevivência das carteiras", value=False)
+        col_1_1_1, col_1_1_2 = st.columns([2,1])
 
-    if survival_check:
-        col1_1, col1_2 = st.columns([1,5])
-        with col1_1:
+        with col_1_1_1:
+            st.markdown("#### Dispersão do patrimônio")
+            st.write("Taxa: **{:.2f} %** - Período: **{} Anos**".format(taxa_carteira, periodo_carteira))
+        with col_1_1_2:
             st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.write("")
-            st.markdown("##### Taxa de Sobrevivência")
+            carteira_check = st.checkbox("Composição das carteiras", value=False)
+            survival_check = st.checkbox("Sobrevivência das carteiras", value=False)
 
-            # Cálculo da taxa de sobrevivência
-            survival = carteiras_pl.drop(columns=["Taxa", "Periodo"]) / cap_inicial * 100
-            survival_total = pd.DataFrame()
-            survival_total["Sobrevivência"] = (
-                        (1 - (survival == 0).sum(axis=0) / survival.shape[0]) * 100)  # .apply(lambda x: f'{x:.2f}')
+        # Box Plot 1 - Dispersão do PL
+        cap_inicial = 3000000
+        carteiras_pl = dados_completos[(dados_completos["Taxa"] == "{:.2f}%".format(taxa_carteira)) &
+                                       (dados_completos["Periodo"] == "{} Anos".format(periodo_carteira))].copy()
 
-            # Seleção da taxa de sobrevivência
-            survival_conservadora = survival_total.loc["Conservadora"].iloc[0]
-            survival_moderada = survival_total.loc["Moderada"].iloc[0]
-            survival_arrojada = survival_total.loc["Arrojada"].iloc[0]
-            survival_agressiva = survival_total.loc["Agressiva"].iloc[0]
+        # Cálculo do PL final em %
+        carteiras_pl_tratada = carteiras_pl.drop(columns=["Taxa", "Periodo"]) / cap_inicial * 100
 
-            # Seleção dos limites para a troca de cor em %
-            lim_inferior = 30
-            lim_superior = 80
+        box_plot_1 = desenha_box_formatado(carteiras_pl_tratada,
+                                           "Patrimônio final para cada simulação",
+                                           "Patrimônio Final [%]",
+                                           "Carteiras")
 
-            # Função para formatar a cor da taxa de sobrevivência
-            def formata_sidebar_survival(nome,valor,min,max):
-                if valor <= min:
-                    texto_formatado = f"**{nome}**\n#### :red[{valor:.2f}%]"
-                elif (valor > min) and (valor <= max):
-                    texto_formatado = f"**{nome}**\n#### :orange[{valor:.2f}%]"
-                else:
-                    texto_formatado = f"**{nome}**\n#### :green[{valor:.2f}%]"
-                return texto_formatado
+        # Botão para observar a taxa de sobrevivência
+        if survival_check:
+            col1_1, col1_2 = st.columns([1,5])
+            with col1_1:
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.write("")
+                st.markdown("##### Taxa de Sobrevivência")
 
-            # Formatação
-            st.write(formata_sidebar_survival("Conservadora",survival_conservadora,lim_inferior,lim_superior))
-            # --------------------------------------------------------------------------------------------
-            st.write(formata_sidebar_survival("Moderada",survival_moderada,lim_inferior,lim_superior))
-            # --------------------------------------------------------------------------------------------
-            st.write(formata_sidebar_survival("Arrojada",survival_arrojada,lim_inferior,lim_superior))
-            # --------------------------------------------------------------------------------------------
-            st.write(formata_sidebar_survival("Agressiva",survival_agressiva,lim_inferior,lim_superior))
+                # Cálculo da taxa de sobrevivência
+                survival = carteiras_pl.drop(columns=["Taxa", "Periodo"]) / cap_inicial * 100
+                survival_total = pd.DataFrame()
+                survival_total["Sobrevivência"] = (
+                            (1 - (survival == 0).sum(axis=0) / survival.shape[0]) * 100)  # .apply(lambda x: f'{x:.2f}')
 
-        with col1_2:
+                # Seleção da taxa de sobrevivência
+                survival_conservadora = survival_total.loc["Conservadora"].iloc[0]
+                survival_moderada = survival_total.loc["Moderada"].iloc[0]
+                survival_arrojada = survival_total.loc["Arrojada"].iloc[0]
+                survival_agressiva = survival_total.loc["Agressiva"].iloc[0]
+
+                # Seleção dos limites para a troca de cor em %
+                lim_inferior = 30
+                lim_superior = 80
+
+                # Função para formatar a cor da taxa de sobrevivência
+                def formata_sidebar_survival(nome,valor,lim_min,lim_max):
+                    if valor <= lim_min:
+                        texto_formatado = f"**{nome}**\n#### :red[{valor:.2f}%]"
+                    elif (valor > lim_min) and (valor <= lim_max):
+                        texto_formatado = f"**{nome}**\n#### :orange[{valor:.2f}%]"
+                    else:
+                        texto_formatado = f"**{nome}**\n#### :green[{valor:.2f}%]"
+                    return texto_formatado
+
+                # Formatação
+                st.write(formata_sidebar_survival("Conservadora",survival_conservadora,lim_inferior,lim_superior))
+                # --------------------------------------------------------------------------------------------
+                st.write(formata_sidebar_survival("Moderada",survival_moderada,lim_inferior,lim_superior))
+                # --------------------------------------------------------------------------------------------
+                st.write(formata_sidebar_survival("Arrojada",survival_arrojada,lim_inferior,lim_superior))
+                # --------------------------------------------------------------------------------------------
+                st.write(formata_sidebar_survival("Agressiva",survival_agressiva,lim_inferior,lim_superior))
+
+            with col1_2:
+                st.plotly_chart(box_plot_1, use_container_width=False)
+        else:
             st.plotly_chart(box_plot_1, use_container_width=False)
-    else:
-        st.plotly_chart(box_plot_1, use_container_width=False)
+        # _______________________________________________________
 
-    # _______________________________________________________
+        # Box Plot 3 - Retorno das Carteiras
+        st.markdown(f"#### Análise dos retornos no período: {periodo_carteira} Anos")
+        opcoes_label1 = {f"Maior retorno [mensal] no periodo":                   1,
+                         f"Menor retorno [mensal] no periodo":                   2,
+                         f"Retorno total no periodo de {periodo_carteira} Anos": 3,
+                         f"Média dos retornos [mensal] no período":              4}
 
-    # Box Plot 3 - Retorno das Carteiras
-    st.markdown(f"#### Análise dos retornos no período: {periodo_carteira} Anos")
-    opcoes_label1 = {f"Maior retorno [mensal] no periodo":                   1,
-                     f"Menor retorno [mensal] no periodo":                   2,
-                     f"Retorno total no periodo de {periodo_carteira} Anos": 3,
-                     f"Média dos retornos [mensal] no período":              4}
+        opcao_radio1 = st.radio("Opções interessantes para análise:", list(opcoes_label1.keys()),label_visibility="hidden", index = 2)
+        janela_analise_ret = st.slider("# Período do retorno móvel [meses]", 2, 24, 6, 1)
+        retornos = calcula_retornos(dados_completos_retornos,
+                                    periodo_carteira,
+                                    nomes_carteiras,
+                                    janela_analise_ret,
+                                    opcoes_label1[opcao_radio1])
 
-    opcao_radio1 = st.radio("Opções interessantes para análise:", list(opcoes_label1.keys()),label_visibility="hidden", index = 2)
-    janela_analise_ret = st.slider("# Período do retorno móvel [meses]", 2, 24, 6, 1)
-    retornos = calcula_retornos(dados_completos_retornos,
-                                periodo_carteira,
-                                nomes_carteiras,
-                                janela_analise_ret,
-                                opcoes_label1[opcao_radio1])
+        box_plot_3 = desenha_box_formatado(retornos*100,
+                                           "Retorno no período para cada simulação",
+                                           "Retornos [%]",
+                                           "Carteiras")
 
-    box_plot_3 = desenha_box_formatado(retornos*100, "Retorno no período para cada simulação","Retornos [%]", "Carteiras")
-    st.plotly_chart(box_plot_3, use_container_width=False)
-    #_______________________________________________________
+        st.plotly_chart(box_plot_3, use_container_width=False)
+        #_______________________________________________________
 
-with col2:
-    # Box Plot 2 - Disperssão do Drawdown
-    draw_downs_totais = pd.DataFrame(columns=["Conservadora", "Moderada", "Arrojada", "Agressiva"])
-    for i in range(len(nomes_carteiras)):
-        dd, mdd = calcula_drawdown(
-            dados_completos_retornos[(dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
-                                     & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[0])].drop(
-                columns=["Carteira", "Periodo"])
-            )
-        draw_downs_totais[nomes_carteiras[i].split()[0]] = mdd
+    with col2:
+        # Box Plot 2 - Dispersão do Drawdown
+        draw_downs_totais = pd.DataFrame(columns=["Conservadora", "Moderada", "Arrojada", "Agressiva"])
+        for i in range(len(nomes_carteiras)):
+            dd, mdd = calcula_drawdown(
+                dados_completos_retornos[(dados_completos_retornos["Periodo"] == "{} Anos".format(periodo_carteira))
+                                         & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[0])].drop(
+                    columns=["Carteira", "Periodo"])
+                )
+            draw_downs_totais[nomes_carteiras[i].split()[0]] = mdd
 
-    box_plot_2 = desenha_box_formatado(draw_downs_totais * 100, "Máximo drawdown no período para cada simulação","Drawdown [%]", "Carteiras")
+        box_plot_2 = desenha_box_formatado(draw_downs_totais * 100,
+                                           "Máximo drawdown no período para cada simulação",
+                                           "Drawdown [%]",
+                                           "Carteiras")
 
-    st.markdown("#### Dispersão do Drawdown")
-    st.write("Periodo: **{} Anos**".format(periodo_carteira))
-    st.plotly_chart(box_plot_2, use_container_width=False)
-    #_______________________________________________________
+        st.markdown("#### Dispersão do Drawdown")
+        st.write("Periodo: **{} Anos**".format(periodo_carteira))
+        st.plotly_chart(box_plot_2, use_container_width=False)
+        #_______________________________________________________
 
-    # Box Plot 4 - Disperssão da Volatilidade
-    st.markdown(f"#### Análise das volatilidades no período: {periodo_carteira} Anos")
-    opcoes_label2 = {f"Maior volatilidade [mensal] no periodo":                   1,
-                     f"Menor volatilidade [mensal] no periodo":                   2,
-                     f"Volatilidade total no período de {periodo_carteira} Anos": 3,
-                     f"Média das volatilidades [mensal] no periodo":              4}
-    st.write()
-    opcao_radio2 = st.radio("Opções interessantes para análise:", list(opcoes_label2.keys()),label_visibility="hidden", index=2)
-    janela_analise_vol = st.slider("# Período da volatilidade móvel [meses]", 2, 24, 6, 1)
-    volatilidade = calcula_volatilidade(dados_completos_retornos,
-                                        periodo_carteira,
-                                        nomes_carteiras,
-                                        janela_analise_vol,
-                                        opcoes_label2[opcao_radio2])
+        # Box Plot 4 - Dispersão da Volatilidade
+        st.markdown(f"#### Análise das volatilidades no período: {periodo_carteira} Anos")
+        opcoes_label2 = {f"Maior volatilidade [mensal] no periodo":                   1,
+                         f"Menor volatilidade [mensal] no periodo":                   2,
+                         f"Volatilidade total no período de {periodo_carteira} Anos": 3,
+                         f"Média das volatilidades [mensal] no periodo":              4}
+        st.write()
+        opcao_radio2 = st.radio("Opções interessantes para análise:", list(opcoes_label2.keys()),label_visibility="hidden", index=2)
+        janela_analise_vol = st.slider("# Período da volatilidade móvel [meses]", 2, 24, 6, 1)
+        volatilidade = calcula_volatilidade(dados_completos_retornos,
+                                            periodo_carteira,
+                                            nomes_carteiras,
+                                            janela_analise_vol,
+                                            opcoes_label2[opcao_radio2])
 
-    box_plot_4 = desenha_linha_formatado(volatilidade*100, "Volatilidade no período para cada simulação","Volatilidade [%]", "Carteiras")
+        box_plot_4 = desenha_linha_formatado(volatilidade*100,
+                                             "Volatilidade no período para cada simulação",
+                                             "Volatilidade [%]",
+                                             "Carteiras")
 
-    st.plotly_chart(box_plot_4, use_container_width=False)
-    #_______________________________________________________
+        st.plotly_chart(box_plot_4, use_container_width=False)
+        #_______________________________________________________
+
+with container_topo:
+    if carteira_check:
+        # Quais carteiras estão sendo analisadas
+        tipos_carteiras = ["Conservadora", "Moderada", "Arrojada", "Agressiva"]
+
+        # Classes dos ativos de cada carteira
+        classe_ativos_conservadora = ["Renda Fixa - CDI",
+                                      "Renda Fixa - CDI"]
+
+        classe_ativos_moderada = ["Renda Fixa - CDI",
+                                  "Renda Fixa - CDI",
+                                  "Renda Fixa - Inflação",
+                                  "Renda Fixa - Inflação",
+                                  "Renda Fixa - Pré",
+                                  "Renda Variável - Imobiliário"]
+
+        classe_ativos_arrojada = ["Renda Fixa - CDI",
+                                  "Renda Fixa - CDI",
+                                  "Renda Fixa - Inflação",
+                                  "Renda Fixa - Inflação",
+                                  "Renda Fixa - Pré",
+                                  "Renda Variável - Imobiliário",
+                                  "Renda Variável - Ações BR",
+                                  "Renda Fixa - Exterior",
+                                  "Renda Fixa - Exterior",
+                                  "Renda Variável - Ações Global",
+                                  "Ouro"]
+
+        classe_ativos_agressiva = ["Renda Fixa - CDI",
+                                   "Renda Fixa - CDI",
+                                   "Renda Fixa - Inflação",
+                                   "Renda Fixa - Inflação",
+                                   "Renda Fixa - Pré",
+                                   "Renda Variável - Imobiliário",
+                                   "Renda Variável - Ações BR",
+                                   "Renda Fixa - Exterior",
+                                   "Renda Fixa - Exterior",
+                                   "Renda Variável - Ações Global",
+                                   "Ouro"]
+
+        # Pesos dos ativos de cada carteira
+        pesos_carteira_conservadora = [0.2,
+                                       0.8]
+
+        pesos_carteira_moderada = [0.08,
+                                   0.32, 0.2, 0.2, 0.15, 0.05]
+
+        pesos_carteira_arrojada = [0.05,
+                                   0.2, 0.125, 0.125, 0.15, 0.05, 0.125, 0.025, 0.025, 0.10, 0.025]
+
+        pesos_carteira_agressiva = [0.03,
+                                    0.12, 0.075, 0.075, 0.1, 0.1, 0.25, 0.025, 0.025, 0.175, 0.025]
+
+        # Ativos de cada carteira
+        ativos_carteira_conservadora = ["CDI",
+                                        "TEVADI"]
+
+        ativos_carteira_moderada = ["CDI",
+                                    "TEVADI", "IMAB-5", "IDA-LIQ-IPCA", "IFRM-P2", "IFIX"]
+
+        ativos_carteira_arrojada = ["CDI",
+                                    "TEVADI", "IMAB-5", "IDA-LIQ-IPCA", "IFRM-P2", "IFIX", "IBRX", "BND", "BNDX",
+                                    "MSCI-World", "IAU"]
+
+        ativos_carteira_agressiva = ["CDI",
+                                     "TEVADI", "IMAB-5", "IDA-LIQ-IPCA", "IFRM-P2", "IFIX", "IBRX", "BND", "BNDX",
+                                     "MSCI-World", "IAU"]
+
+        # Colunas para o dataframe
+        colunas_carteiras = ["Tipo", "Classe", "Ativos", "Pesos"]
+
+        # Dados consolidados para o Treemap
+        dados_consolidados_carteiras = [
+            {
+                colunas_carteiras[0]: tipos_carteiras[0],
+                colunas_carteiras[1]: classe_ativos_conservadora,
+                colunas_carteiras[2]: ativos_carteira_conservadora,
+                colunas_carteiras[3]: pesos_carteira_conservadora
+            },
+            {
+                colunas_carteiras[0]: tipos_carteiras[1],
+                colunas_carteiras[1]: classe_ativos_moderada,
+                colunas_carteiras[2]: ativos_carteira_moderada,
+                colunas_carteiras[3]: pesos_carteira_moderada
+            },
+            {
+                colunas_carteiras[0]: tipos_carteiras[2],
+                colunas_carteiras[1]: classe_ativos_arrojada,
+                colunas_carteiras[2]: ativos_carteira_arrojada,
+                colunas_carteiras[3]: pesos_carteira_arrojada
+            },
+            {
+                colunas_carteiras[0]: tipos_carteiras[3],
+                colunas_carteiras[1]: classe_ativos_agressiva,
+                colunas_carteiras[2]: ativos_carteira_agressiva,
+                colunas_carteiras[3]: pesos_carteira_agressiva
+            },
+        ]
+
+        linhas_aux = []
+        for carteira in dados_consolidados_carteiras:
+            tipo = carteira["Tipo"]
+            for classe, ativo, peso in zip(carteira["Classe"], carteira["Ativos"], carteira["Pesos"]):
+                linhas_aux.append({"Tipo": tipo, "Classe": classe, "Ativos": ativo, "Pesos": peso * 100})
+
+        df_carteiras = pd.DataFrame(linhas_aux)
+
+        # Definir a ordem personalizada para a coluna "Tipo"
+        ordem_tipos = ["Conservadora", "Moderada", "Arrojada", "Agressiva"]
+        df_carteiras["Tipo"] = pd.Categorical(df_carteiras["Tipo"], categories=ordem_tipos, ordered=True)
+
+        df_carteiras["Risco"] = df_carteiras["Tipo"].apply(lambda x: 1 if x == "Conservadora" else
+        2 if x == "Moderada" else
+        3 if x == "Arrojada" else
+        4)
+
+        st.plotly_chart(desenha_treemap_formatado(df_carteiras, "Composição das Carteiras"))
