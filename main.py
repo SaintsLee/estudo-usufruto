@@ -94,16 +94,21 @@ with container_baixo:
     # Exibir gráficos em cada coluna
     with col1:
 
-        col_1_1_1, col_1_1_2 = st.columns([2,1])
+        col_1_1_1, col_1_1_2= st.columns(2)
 
         with col_1_1_1:
             st.markdown("#### Dispersão do patrimônio")
             st.write("Taxa: **{:.2f} %** - Período: **{} Anos**".format(taxa_carteira, periodo_carteira))
         with col_1_1_2:
             #st.write("")
-            info_check = st.checkbox("Informações e premissas", value=False)
-            carteira_check = st.checkbox("Composição das carteiras", value=False)
-            survival_check = st.checkbox("Sobrevivência das carteiras", value=False)
+            lista_opcoes_multiselect = ["Informações",
+                                        "Composição",
+                                        "Sobrevivência"]
+
+            opcoes_multiselect = st.segmented_control("",
+                                                      lista_opcoes_multiselect,
+                                                      selection_mode="multi",
+                                                      help="Opções adicionais")
 
         # Box Plot 1 - Dispersão do PL
         cap_inicial = 3000000
@@ -119,7 +124,7 @@ with container_baixo:
                                            "Carteiras")
 
         # Botão para observar a taxa de sobrevivência
-        if survival_check:
+        if lista_opcoes_multiselect[2] in opcoes_multiselect:
             col1_1, col1_2 = st.columns([1,5])
             with col1_1:
                 st.write("")
@@ -174,13 +179,16 @@ with container_baixo:
 
         # Box Plot 3 - Retorno das Carteiras
         st.markdown(f"#### Análise dos retornos no período: {periodo_carteira} Anos")
-        opcoes_label1 = {f"Maior retorno [mensal] no periodo":                   1,
+        opcoes_label1 = {f"Retorno total no periodo de {periodo_carteira} Anos": 1,
                          f"Menor retorno [mensal] no periodo":                   2,
-                         f"Retorno total no periodo de {periodo_carteira} Anos": 3,
+                         f"Maior retorno [mensal] no periodo":                   3,
                          f"Média dos retornos [mensal] no período":              4}
 
-        opcao_radio1 = st.radio("Opções interessantes para análise:", list(opcoes_label1.keys()),label_visibility="hidden", index = 2)
-        if not (opcoes_label1[opcao_radio1] == 3):
+        opcao_radio1 = st.radio("Opções interessantes para análise:",
+                                list(opcoes_label1.keys()),
+                                label_visibility="hidden",
+                                index = 0)
+        if not (opcoes_label1[opcao_radio1] == 1):
             janela_analise_ret = st.slider("# Período do retorno móvel [meses]", 2, 24, 6, 1)
         else:
             janela_analise_ret = 3
@@ -217,18 +225,22 @@ with container_baixo:
 
         st.markdown("#### Dispersão do Drawdown")
         st.write("Periodo: **{} Anos**".format(periodo_carteira))
+
         st.plotly_chart(box_plot_2, use_container_width=False)
         #_______________________________________________________
 
         # Box Plot 4 - Dispersão da Volatilidade
         st.markdown(f"#### Análise das volatilidades no período: {periodo_carteira} Anos")
-        opcoes_label2 = {f"Maior volatilidade [mensal] no periodo":                   1,
+        opcoes_label2 = {f"Volatilidade total no período de {periodo_carteira} Anos": 1,
                          f"Menor volatilidade [mensal] no periodo":                   2,
-                         f"Volatilidade total no período de {periodo_carteira} Anos": 3,
+                         f"Maior volatilidade [mensal] no periodo":                   3,
                          f"Média das volatilidades [mensal] no periodo":              4}
-        st.write()
-        opcao_radio2 = st.radio("Opções interessantes para análise:", list(opcoes_label2.keys()),label_visibility="hidden", index=2)
-        if not (opcoes_label2[opcao_radio2] == 3):
+
+        opcao_radio2 = st.radio("Opções interessantes para análise:",
+                                list(opcoes_label2.keys()),
+                                label_visibility="hidden",
+                                index=0)
+        if not (opcoes_label2[opcao_radio2] == 1):
             janela_analise_vol = st.slider("# Período da volatilidade móvel [meses]", 2, 24, 6, 1)
         else:
             janela_analise_vol = 3
@@ -247,7 +259,7 @@ with container_baixo:
         #_______________________________________________________
 
 with container_topo:
-    if info_check:
+    if lista_opcoes_multiselect[0] in opcoes_multiselect:
         st.markdown("""
         ### Premissas básicas do modelo: 
         * Foi configurado um modelo **ARIMA + GARCH** para cada ativo que compõe a carteira;
@@ -269,11 +281,8 @@ with container_topo:
             * Para o **retorno total** foi realizado o cálculo do retorno real no período selecionado, assim como a volatilidade
         """)
 
-    if carteira_check:
+    if lista_opcoes_multiselect[1] in opcoes_multiselect:
 
         df_carteiras = apresenta_carteiras()
 
         st.plotly_chart(desenha_treemap_formatado(df_carteiras, "Composição das Carteiras"))
-
-
-
