@@ -272,7 +272,7 @@ with container_topo:
                 * Período: 10 anos
                 * Taxa: 3,50%
                 * Carteira: Conservadora
-                * Número de carteiras: 2000
+                * Número de simulações: 2000
         * Análise de **Patrimônio Final** e **Drawdown**;
             * Dado um cenário, foi observado o **valor final do Patrimônio** em todas as simulações
             * Para o **Drawdown**, foi observado o **drawdown máximo** no **período** em cada uma das simulações
