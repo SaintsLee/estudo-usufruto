@@ -105,10 +105,10 @@ with container_baixo:
                                         "Composição",
                                         "Sobrevivência"]
 
-            opcoes_multiselect = st.segmented_control("",
+            opcoes_multiselect = st.segmented_control("Opções",
                                                       lista_opcoes_multiselect,
                                                       selection_mode="multi",
-                                                      help="Opções adicionais")
+                                                      label_visibility="hidden")
 
         # Box Plot 1 - Dispersão do PL
         cap_inicial = 3000000
@@ -199,7 +199,7 @@ with container_baixo:
                                     janela_analise_ret,
                                     opcoes_label1[opcao_radio1])
 
-        box_plot_3 = desenha_box_formatado(retornos*100,
+        box_plot_3 = desenha_box_formatado(retornos,
                                            "Retorno no período para cada simulação",
                                            "Retornos [%]",
                                            "Carteiras")
@@ -232,9 +232,9 @@ with container_baixo:
         # Box Plot 4 - Dispersão da Volatilidade
         st.markdown(f"#### Análise das volatilidades no período: {periodo_carteira} Anos")
         opcoes_label2 = {f"Volatilidade total no período de {periodo_carteira} Anos": 1,
-                         f"Menor volatilidade [mensal] no periodo":                   2,
-                         f"Maior volatilidade [mensal] no periodo":                   3,
-                         f"Média das volatilidades [mensal] no periodo":              4}
+                         f"Menor volatilidade [anual] no periodo":                   2,
+                         f"Maior volatilidade [anual] no periodo":                   3,
+                         f"Média das volatilidades [anual] no periodo":              4}
 
         opcao_radio2 = st.radio("Opções interessantes para análise:",
                                 list(opcoes_label2.keys()),

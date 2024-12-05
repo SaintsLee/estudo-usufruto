@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 # Função para o cálculo do Drawdown
 def calcula_drawdown(dataset):
@@ -43,7 +44,7 @@ def calcula_retornos(dados_completos_retornos, periodo_carteira, nomes_carteiras
 
             retornos_totais[nomes_carteiras[i].split()[0]] = retornos.dropna()
 
-    return retornos_totais
+    return retornos_totais*100
 
 # Função para o cálculo das volatilidades
 def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carteiras, periodo_movel,opcao):
@@ -54,7 +55,7 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
                                                 & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
                 0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).std().max(axis = 0)
 
-            vols_totais[nomes_carteiras[i].split()[0]] = vols
+            vols_totais[nomes_carteiras[i].split()[0]] = vols*np.sqrt(12)
 
     elif opcao == 2:
         for i in range(len(nomes_carteiras)):
@@ -62,7 +63,7 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
                                                 & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
                 0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).std().min(axis=0)
 
-            vols_totais[nomes_carteiras[i].split()[0]] = vols
+            vols_totais[nomes_carteiras[i].split()[0]] = vols*np.sqrt(12)
 
     elif opcao == 1:
         for i in range(len(nomes_carteiras)):
@@ -70,7 +71,7 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
                                                 & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
                 0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().std()
 
-            vols_totais[nomes_carteiras[i].split()[0]] = vols
+            vols_totais[nomes_carteiras[i].split()[0]] = vols*np.sqrt(periodo_carteira*12)
 
     elif opcao == 4:
         for i in range(len(nomes_carteiras)):
@@ -78,6 +79,6 @@ def calcula_volatilidade(dados_completos_retornos, periodo_carteira, nomes_carte
                                                 & (dados_completos_retornos["Carteira"] == nomes_carteiras[i].split()[
                 0])].drop(columns=["Carteira", "Periodo"]).pct_change().dropna().rolling(periodo_movel).std().mean(axis=0)
 
-            vols_totais[nomes_carteiras[i].split()[0]] = vols
+            vols_totais[nomes_carteiras[i].split()[0]] = vols*np.sqrt(12)
 
     return vols_totais
