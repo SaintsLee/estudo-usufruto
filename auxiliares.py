@@ -1,13 +1,25 @@
 import pandas as pd
 import streamlit as st
+import gdown
 
 # Armazenamento em cache da base de dados a ser apresentada no dashboard
 @st.cache_data
 def load_data():
     dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
 
-    dados_completos_retornos = pd.read_parquet("dados_completos__retornos_brotli.parquet")
+    # ID do arquivo no Google Drive
+    file_id = "1r9ZmWRLVhZhhjGrWO-u1U0rEdNkxK8JD"
+    url = f"https://drive.google.com/uc?id={file_id}"
+    
+    # Baixando o arquivo do Google Drive
+    output = "dados_completos__retornos_brotli.parquet"
+    gdown.download(url, output, quiet=False)
+    
+    # Carregar o arquivo no pandas
+    dados_completos_retornos = pd.read_parquet(output)
 
+    #dados_completos_retornos = pd.read_parquet("dados_completos__retornos_brotli.parquet")
+    
     return dados_completos, dados_completos_retornos
 
 # Armazenamento em cache da criação do dataframe ajustado para as carteiras
