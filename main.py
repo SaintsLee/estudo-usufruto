@@ -5,6 +5,7 @@ from calculos_internos import calcula_drawdown, calcula_retornos, calcula_volati
 from auxiliares import load_data, apresenta_carteiras
 
 # Configuração da página
+# Ajuste Base
 st.set_page_config(layout="wide", page_title="Estudo Usufruto", page_icon = "portfel_logo.ico")
 
 # Imagem do logo Portfel
