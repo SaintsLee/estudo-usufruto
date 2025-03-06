@@ -5,19 +5,27 @@ import gdown
 # Armazenamento em cache da base de dados a ser apresentada no dashboard
 @st.cache_data
 def load_data():
-    dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
-
     # ID do arquivo no Google Drive
-    file_id = "1r9ZmWRLVhZhhjGrWO-u1U0rEdNkxK8JD"
-    url = f"https://drive.google.com/uc?id={file_id}"
+    file_id_1 = "1r9ZmWRLVhZhhjGrWO-u1U0rEdNkxK8JD"
+    url_1 = f"https://drive.google.com/uc?id={file_id_1}"
+    
+    # Baixando o arquivo do Google Drive
+    output_1 = "dados_completos_brotli.parquet"
+    gdown.download(url_1, output_1, quiet=False)
+    dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
+    #dados_completos = pd.read_parquet("dados_completos_brotli.parquet")
+
+    
+    # ID do arquivo no Google Drive
+    file_id_2 = "1zeuirY7WnEAqSDiVCM0SK3ZTkG7W49li"
+    url_2 = f"https://drive.google.com/uc?id={file_id_2}"
     
     # Baixando o arquivo do Google Drive
     output = "dados_completos__retornos_brotli.parquet"
-    gdown.download(url, output, quiet=False)
+    gdown.download(url_2, output, quiet=False)
     
     # Carregar o arquivo no pandas
     dados_completos_retornos = pd.read_parquet(output)
-
     #dados_completos_retornos = pd.read_parquet("dados_completos__retornos_brotli.parquet")
     
     return dados_completos, dados_completos_retornos
