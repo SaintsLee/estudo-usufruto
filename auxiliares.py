@@ -6,7 +6,7 @@ import gdown
 @st.cache_data
 def load_data():
     # ID do arquivo no Google Drive
-    file_id_1 = "1r9ZmWRLVhZhhjGrWO-u1U0rEdNkxK8JD"
+    file_id_1 = "1LEXaiePyWbFU1D8reSrye6-CLpqsKNlp"
     url_1 = f"https://drive.google.com/uc?id={file_id_1}"
     # Baixando o arquivo do Google Drive
     output_1 = "dados_completos_brotli.parquet"
@@ -16,7 +16,7 @@ def load_data():
 
     
     # ID do arquivo no Google Drive
-    file_id_2 = "1zeuirY7WnEAqSDiVCM0SK3ZTkG7W49li"
+    file_id_2 = "1gPKi89Zwoq0hify62Pk-0bxY7LelTjfr"
     url_2 = f"https://drive.google.com/uc?id={file_id_2}"
     
     # Baixando o arquivo do Google Drive
