@@ -66,7 +66,8 @@ st.markdown(
 )
 
 dados_completos_retornos, dados_completos = load_data()
-
+st.dataframe(dados_completos_retornos)
+st.dataframe(dados_completos)
 # Definição do nome e dos períodos das carteiras assim como foi feito na criação dos dados pela simulação
 nomes_carteiras = ["Conservadora - Análise PL",
                    "Moderada - Análise PL",
